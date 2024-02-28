@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .options-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+            display: block;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        select, input[type="number"], button {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="%235a5a5a" d="M10 12L6 8h8l-4 4z"/></svg>');
+            background-position: right 10px top 50%;
+            background-repeat: no-repeat;
+            background-size: 15px;
+            padding-right: 30px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        audio {
+            margin-top: 20px;
+            display: block;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Musical Therapy Relaxation</h1>
+        <p>This is a software created by a highschool student and a investigation project to help students facing academic stress to relax. This project is based on an investigation that proves that this two musical frecuencies have a relaxing efect on academic stress. Hope it helps and keep on going academic weapon!</p>
+        <div class="options-container">
+            <label for="frequency">Choose Frequency:</label>
+            <select id="frequency">
+                <option value="432">432 Hz</option>
+                <option value="528">528 Hz</option>
+            </select>
+        </div>
+        <div class="options-container">
+            <label for="duration">Choose Duration (minutes):</label>
+            <input type="number" id="duration" min="1" value="5">
+        </div>
+        <button onclick="playSong()">Play</button>
+
+        <audio id="audio" controls></audio>
+    </div>
+
+    <script>
+        function playSong() {
+            var frequency = document.getElementById("frequency").value;
+            var duration = document.getElementById("duration").value * 60; // Convert minutes to seconds
+            var folder = (frequency === "432") ? "432Hz" : "528Hz";
+
+            fetch(`/${folder}`)
+            .then(response => response.text())
+            .then(text => {
+                var files = text.split("\n").filter(file => file.trim().length > 0);
+                var totalTime = 0;
+                var index = 0;
+                
+                function playNextSong() {
+                    if (index >= files.length || totalTime >= duration) {
+                        return;
+                    }
+                    var audio = document.getElementById("audio");
+                    var source = document.createElement("source");
+                    source.src = `/${folder}/${files[index]}`;
+                    audio.appendChild(source);
+                    audio.load();
+                    audio.play();
+                    totalTime += audio.duration;
+                    index++;
+                    audio.addEventListener("ended", playNextSong);
+                }
+
+                playNextSong();
+            })
+            .catch(error => console.error('Error fetching songs:', error));
+        }
+    </script>
+</body>
+</html>
